@@ -2,413 +2,111 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="mobile-web-app-capable" content="yes">
-  <title>2D Racing Game with Autopilot</title>
+  <title>Car Upgrade Game</title>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      user-select: none;
-      -webkit-user-select: none;
-    }
-
     body {
-      background-color: #050b05;
       font-family: Arial, sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      overflow: hidden;
-    }
-
-    #game-container {
-      position: relative;
-      width: 320px;
-      height: 520px;
-      background-color: #1a1c29;
-      border-left: 6px solid #e2b007;
-      border-right: 6px solid #e2b007;
-      overflow: hidden;
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
-    }
-
-    /* Top HUD Bar */
-    #top-bar {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      right: 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      z-index: 10;
-    }
-
-    .score-text {
-      color: #39ff14;
-      font-weight: bold;
-      font-size: 18px;
-    }
-
-    .best-text {
-      color: #ff3399;
-      font-weight: bold;
-      font-size: 14px;
-    }
-
-    .icon-btn {
-      background: rgba(255, 255, 255, 0.15);
-      border: 1px solid rgba(255, 255, 255, 0.3);
+      background: #1e1e24;
       color: #fff;
-      border-radius: 50%;
-      width: 34px;
-      height: 34px;
-      font-size: 14px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    /* Road Markings */
-    .lane-line {
-      position: absolute;
-      width: 4px;
-      height: 35px;
-      background-color: #ffffff;
-      opacity: 0.7;
-    }
-
-    .line-left { left: 104px; }
-    .line-right { left: 208px; }
-
-    /* Cars */
-    .car {
-      position: absolute;
-      width: 44px;
-      height: 65px;
-      border-radius: 8px;
-    }
-
-    /* Wheels */
-    .car::before, .car::after {
-      content: '';
-      position: absolute;
-      width: 6px;
-      height: 12px;
-      background: #ff3333;
-      border-radius: 2px;
-      bottom: -4px;
-    }
-    .car::before { left: 4px; }
-    .car::after { right: 4px; }
-
-    #player {
-      background-color: #00d2ff;
-      border: 2px solid #0099cc;
-      z-index: 5;
-    }
-
-    /* Game Over / Pause Overlay */
-    #overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.85);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 20;
-    }
-
-    #overlay h1 {
-      color: #ff3366;
-      font-size: 26px;
-      margin-bottom: 10px;
-    }
-
-    .btn-play {
-      background: #00d2ff;
-      color: #000;
-      border: none;
-      padding: 12px 28px;
-      font-size: 16px;
-      font-weight: bold;
-      border-radius: 20px;
-      cursor: pointer;
-    }
-
-    /* On-Screen Touch Controls */
-    #controls {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      width: 320px;
-      margin-top: 10px;
-    }
-
-    .touch-row {
-      display: flex;
-      gap: 10px;
-    }
-
-    .touch-btn {
-      flex: 1;
-      height: 60px;
-      background: rgba(0, 180, 216, 0.15);
-      border: 2px solid #00b4d8;
-      border-radius: 12px;
-      color: #fff;
-      font-size: 22px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      touch-action: manipulation;
-    }
-
-    .touch-btn:active {
-      background: rgba(0, 180, 216, 0.4);
-    }
-
-    #ap-toggle-btn {
-      padding: 10px;
-      background: #222;
-      border: 2px solid #555;
-      color: #aaa;
-      font-weight: bold;
-      border-radius: 8px;
       text-align: center;
+      padding: 20px;
+    }
+    .card {
+      background: #2b2d42;
+      border-radius: 10px;
+      padding: 20px;
+      max-width: 400px;
+      margin: 0 auto;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+    .stats {
+      font-size: 1.2rem;
+      margin-bottom: 15px;
+    }
+    button {
+      background: #4caf50;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      margin: 5px;
+      font-size: 1rem;
+      border-radius: 5px;
       cursor: pointer;
     }
-
-    #ap-toggle-btn.active {
-      background: #00e676;
-      border-color: #00e676;
-      color: #000;
-      box-shadow: 0 0 10px #00e676;
+    button:disabled {
+      background: #555;
+      cursor: not-allowed;
     }
   </style>
 </head>
 <body>
 
-  <div id="game-container">
-    <div id="top-bar">
-      <div class="score-text" id="score">0</div>
-      <div class="best-text">Best <span id="best-score">1640</span></div>
-      <div style="display: flex; gap: 8px;">
-        <button class="icon-btn" onclick="toggleMute()">🔊</button>
-        <button class="icon-btn" onclick="togglePause()">⏸</button>
-      </div>
+  <div class="card">
+    <h2>🚗 Car Garage</h2>
+    
+    <!-- Stats Display -->
+    <div class="stats">
+      <p>💰 Coins: <span id="coin-count">0</span></p>
+      <p>⚡ Top Speed: <span id="car-speed">100</span> km/h</p>
     </div>
 
-    <div id="player" class="car"></div>
-
-    <div id="overlay">
-      <h1>READY TO DRIVE?</h1>
-      <button class="btn-play" onclick="startGame()">START GAME</button>
-    </div>
+    <!-- Controls -->
+    <button onclick="collectCoins()">🪙 Collect 10 Coins</button>
+    <button id="upgrade-btn" onclick="upgradeCar()">🚀 Upgrade Speed (Cost: 50)</button>
   </div>
 
-  <!-- Touch Controls & Autopilot Button -->
-  <div id="controls">
-    <div class="touch-row">
-      <div class="touch-btn" id="btn-left">◀</div>
-      <div class="touch-btn" id="btn-right">▶</div>
-    </div>
-    <div id="ap-toggle-btn" onclick="toggleAutopilot()">🤖 AUTOPILOT: OFF</div>
-  </div>
+  <!-- Audio Elements -->
+  <!-- Note: Replace the sound URLs with your own .mp3 file paths -->
+  <audio id="sfx-coin" src="https://actions.google.com/sounds/v1/cartoon/clink_1.ogg" preload="auto"></audio>
+  <audio id="sfx-upgrade" src="https://actions.google.com/sounds/v1/cartoon/wood_whistle.ogg" preload="auto"></audio>
 
   <script>
-    const container = document.getElementById('game-container');
-    const player = document.getElementById('player');
-    const scoreText = document.getElementById('score');
-    const overlay = document.getElementById('overlay');
-    const apBtn = document.getElementById('ap-toggle-btn');
+    // Game State
+    let coins = 0;
+    let topSpeed = 100;
+    let upgradeCost = 50;
 
-    let gameActive = false;
-    let autopilot = false;
-    let score = 0;
-    let lanes = [30, 138, 246]; // 3 Lanes: Left, Middle, Right
-    let currentLane = 1; // Start in Middle Lane
-    let enemies = [];
-    let roadLines = [];
-    let speed = 5;
-
-    // Create Road Lines
-    for (let i = 0; i < 6; i++) {
-      let lineL = document.createElement('div');
-      lineL.className = 'lane-line line-left';
-      lineL.style.top = (i * 100) + 'px';
-      
-      let lineR = document.createElement('div');
-      lineR.className = 'lane-line line-right';
-      lineR.style.top = (i * 100) + 'px';
-
-      container.appendChild(lineL);
-      container.appendChild(lineR);
-      roadLines.push(lineL, lineR);
+    // Helper function to play sound with rapid-click support
+    function playSFX(id) {
+      const sound = document.getElementById(id);
+      sound.currentTime = 0;
+      sound.play();
     }
 
-    // Input Listeners
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowLeft' || e.key === 'a') moveLeft();
-      if (e.key === 'ArrowRight' || e.key === 'd') moveRight();
-      if (e.key === 'p' || e.key === 'P') toggleAutopilot();
-    });
+    // Function to handle earning coins
+    function collectCoins() {
+      coins += 10;
+      playSFX('sfx-coin');
+      updateUI();
+    }
 
-    const bindBtn = (id, action) => {
-      const el = document.getElementById(id);
-      el.addEventListener('touchstart', (e) => { e.preventDefault(); action(); });
-      el.addEventListener('click', action);
-    };
-
-    bindBtn('btn-left', moveLeft);
-    bindBtn('btn-right', moveRight);
-
-    function moveLeft() {
-      if (currentLane > 0) {
-        currentLane--;
-        updatePlayerPos();
+    // Function to handle upgrading the car
+    function upgradeCar() {
+      if (coins >= upgradeCost) {
+        coins -= upgradeCost;
+        topSpeed += 15;
+        upgradeCost += 25; // Increase cost for next upgrade
+        
+        playSFX('sfx-upgrade');
+        updateUI();
       }
     }
 
-    function moveRight() {
-      if (currentLane < 2) {
-        currentLane++;
-        updatePlayerPos();
-      }
-    }
-
-    function updatePlayerPos() {
-      player.style.left = lanes[currentLane] + 'px';
-      player.style.bottom = '20px';
-    }
-
-    function toggleAutopilot() {
-      autopilot = !autopilot;
-      if (autopilot) {
-        apBtn.textContent = '🤖 AUTOPILOT: ON';
-        apBtn.classList.add('active');
-      } else {
-        apBtn.textContent = '🤖 AUTOPILOT: OFF';
-        apBtn.classList.remove('active');
-      }
-    }
-
-    function startGame() {
-      score = 0;
-      speed = 5;
-      currentLane = 1;
-      updatePlayerPos();
+    // Function to refresh UI display
+    function updateUI() {
+      document.getElementById('coin-count').innerText = coins;
+      document.getElementById('car-speed').innerText = topSpeed;
       
-      enemies.forEach(e => e.element.remove());
-      enemies = [];
-
-      overlay.style.display = 'none';
-      gameActive = true;
-
-      spawnEnemy();
-      spawnEnemy();
-
-      requestAnimationFrame(gameLoop);
-    }
-
-    function spawnEnemy() {
-      const enemyEl = document.createElement('div');
-      enemyEl.className = 'car';
+      const upgradeBtn = document.getElementById('upgrade-btn');
+      upgradeBtn.innerText = `🚀 Upgrade Speed (Cost: ${upgradeCost})`;
       
-      const colors = ['#00e676', '#ff0055', '#aa00ff', '#ffab00'];
-      enemyEl.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-      
-      const lane = Math.floor(Math.random() * 3);
-      const enemy = {
-        element: enemyEl,
-        lane: lane,
-        y: -100 - (enemies.length * 220)
-      };
-
-      enemyEl.style.left = lanes[lane] + 'px';
-      enemyEl.style.top = enemy.y + 'px';
-      
-      container.appendChild(enemyEl);
-      enemies.push(enemy);
+      // Disable upgrade button if player doesn't have enough coins
+      upgradeBtn.disabled = coins < upgradeCost;
     }
 
-    function gameLoop() {
-      if (!gameActive) return;
-
-      // Autopilot AI System
-      if (autopilot) {
-        let threat = enemies.find(e => e.lane === currentLane && e.y > 100 && e.y < 420);
-        if (threat) {
-          // Find an empty lane to dodge into
-          if (currentLane === 1) {
-            let leftBusy = enemies.some(e => e.lane === 0 && e.y > 100 && e.y < 420);
-            if (!leftBusy) moveLeft();
-            else moveRight();
-          } else if (currentLane === 0) {
-            moveRight();
-          } else if (currentLane === 2) {
-            moveLeft();
-          }
-        }
-      }
-
-      // Move Road Lines
-      roadLines.forEach(line => {
-        let top = parseInt(line.style.top) + speed;
-        if (top > 520) top = -40;
-        line.style.top = top + 'px';
-      });
-
-      // Move Traffic Cars
-      enemies.forEach(enemy => {
-        enemy.y += speed;
-        enemy.element.style.top = enemy.y + 'px';
-
-        // Collision Check (Player position is around y: 435px)
-        if (enemy.lane === currentLane && enemy.y > 370 && enemy.y < 480) {
-          gameOver();
-        }
-
-        // Reset Traffic Car when off screen
-        if (enemy.y > 520) {
-          enemy.y = -100;
-          enemy.lane = Math.floor(Math.random() * 3);
-          enemy.element.style.left = lanes[enemy.lane] + 'px';
-          
-          score += 10;
-          scoreText.textContent = score;
-          if (score % 60 === 0) speed += 0.5;
-        }
-      });
-
-      requestAnimationFrame(gameLoop);
-    }
-
-    function gameOver() {
-      gameActive = false;
-      overlay.querySelector('h1').textContent = `CRASH! SCORE: ${score}`;
-      overlay.querySelector('.btn-play').textContent = 'RESTART';
-      overlay.style.display = 'flex';
-    }
-
-    function togglePause() {
-      gameActive = !gameActive;
-      if (gameActive) requestAnimationFrame(gameLoop);
-    }
-
-    function toggleMute() {
-      // Sound toggle placeholder
-    }
+    // Initialize UI on load
+    updateUI();
   </script>
+
 </body>
 </html>
